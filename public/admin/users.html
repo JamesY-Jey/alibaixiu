@@ -197,8 +197,8 @@
             <td>{{$value.nickName}}</td>
             <td>{{$value.status == 1 ? "激活" : "未激活"}}</td>
             <td>{{$value.role == "admin" ? "超级管理员" : "普通用户"}}</td>
-            <td class="text-center">
-                <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
+            <td class="text-center" data-id="{{$value._id}}">
+                <a href="javascript:;" class="btn btn-default btn-xs edit">编辑</a>
                 <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
             </td>
         </tr>
@@ -269,6 +269,43 @@
                     $('#prev').attr('src', res[0].avatar);
                 }
             })
+        })
+
+        // 修改用户功能
+        var id = null;
+        $('tbody').on('click', '.edit', function() {
+            // 获取点击用户的id
+            id = $(this).parent().attr('data-id');
+            // 表单替换当前点击用户的数据
+            $('form>h2').text('修改用户');
+            // 获取点击行元素下面的子节点对象
+            var trObj = $(this).parents('tr');
+            $('#email').val(trObj.children().eq(2).text());
+            $('#nickName').val(trObj.children().eq(3).text());
+            var status = trObj.children().eq(4).text();
+            var role = trObj.children().eq(5).text();
+            var imgSrc = trObj.children().eq(1).find('img').attr('src');
+            // 填充图片
+            // 下面的判断因为在之前模板图片路径已经有默认路径 不做判断
+            var defaultImg = '../assets/img/default.png';
+            if (imgSrc && imgSrc != defaultImg) {
+                $('#prev').attr('src', imgSrc);
+                $('#img').val(imgSrc)
+            } else {
+                $('#img').val('')
+            }
+
+            if (status == '激活') {
+                $('#active').prop('checked', true)
+            } else {
+                $('#unactive').prop('checked', true)
+            }
+
+            if (role == '超级管理员') {
+                $('#admin').prop('checked', true)
+            } else {
+                $('#normal').prop('checked', true)
+            }
         })
     </script>
     <script>
