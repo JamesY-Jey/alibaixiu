@@ -45,42 +45,43 @@
                             <label>头像</label>
                             <div class="form-group">
                                 <label class="form-image">
-                  <input id="avatar" type="file">
-                  <img src="../assets/img/default.png">
-                  <i class="mask fa fa-upload"></i>
-                </label>
+                                    <input id="avatar" type="file">
+                                    <img src="../assets/img/default.png" id="prev">
+                                    <i class="mask fa fa-upload"></i>
+                                </label>
+                                <input type="hidden" id="img" name="avatar">
                             </div>
                         </div>
                         <div class="form-group">
                             <label>邮箱</label>
-                            <input class="form-control" type="email" placeholder="请输入邮箱">
+                            <input class="form-control" type="email" placeholder="请输入邮箱" name="email" id="email">
                         </div>
                         <div class="form-group">
                             <label>昵称</label>
-                            <input class="form-control" type="text" placeholder="请输入昵称">
+                            <input class="form-control" type="text" placeholder="请输入昵称" name="nickName" id="nickName">
                         </div>
                         <div class="form-group">
                             <label>密码</label>
-                            <input class="form-control" type="text" placeholder="请输入密码">
+                            <input class="form-control" type="text" placeholder="请输入密码" name="password" id="password">
                         </div>
                         <div class="form-group">
                             <div class="radio-inline">
-                                <label><input type="radio">未激活</label>
+                                <label><input type="radio" name="status" value="0" id="unactive">未激活</label>
                             </div>
                             <div class="radio-inline">
-                                <label><input type="radio" checked>激活</label>
+                                <label><input type="radio" checked  name="status" value="1" id="active">激活</label>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="radio-inline">
-                                <label><input type="radio" checked>超级管理员</label>
+                                <label><input type="radio" checked name="role" value="admin" id="admin">超级管理员</label>
                             </div>
                             <div class="radio-inline">
-                                <label><input type="radio">普通用户</label>
+                                <label><input type="radio" name="role" value="normal" id="normal">普通用户</label>
                             </div>
                         </div>
                         <div class="form-group">
-                            <button class="btn btn-primary" type="submit">添加</button>
+                            <button class="btn btn-primary" type="button" id="addUser">添加</button>
                         </div>
                     </form>
                 </div>
@@ -184,17 +185,18 @@
 
     <script src="../assets/vendors/jquery/jquery.js"></script>
     <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
+    <!-- common.js 里退出登录的功能 -->
     <script src="../assets//js/common.js"></script>
     <script src="../assets/vendors/art-template/template-web.js"></script>
     <script type="text/html" id="userTpl">
         {{each list}}
         <tr>
             <td class="text-center"><input type="checkbox"></td>
-            <td class="text-center"><img class="avatar" src="../assets/img/default.png"></td>
+            <td class="text-center"><img class="avatar" src="{{if $value.avatar == null}}../assets/img/default.png{{else}}{{$value.avatar}}{{/if}}"></td>
             <td>{{$value.email}}</td>
             <td>{{$value.nickName}}</td>
             <td>{{$value.status == 1 ? "激活" : "未激活"}}</td>
-            <td>{{$value.role == admin ? "普通用户" : "超级管理员"}}</td>
+            <td>{{$value.role == "admin" ? "超级管理员" : "普通用户"}}</td>
             <td class="text-center">
                 <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
                 <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
@@ -210,7 +212,7 @@
             type: 'get',
             url: '/users',
             success: function(res) {
-                console.log(res)
+                // console.log(res)
                 userArr = res;
                 render(userArr);
             }
@@ -223,6 +225,51 @@
             });
             $('tbody').html(str);
         }
+
+        // 用户添加功能
+        $('#addUser').on('click', function() {
+            // serialize 就是用于收集表单数据 只要表单里面的输入框的内容有name属性就会收集到
+            let formData = $('form').serialize();
+            $.ajax({
+                type: 'post',
+                url: '/users',
+                data: formData,
+                success: function(res) {
+                    // 把添加的用户数据添加到数组中
+                    userArr.push(res);
+                    render(userArr);
+                    // 添加后把表单清空
+                    $('#prev').attr('src', '../assets/img/default.png');
+                    $('#img').val('');
+                    $('.form-control').val('');
+                    $('#unactive').prop('checked', false);
+                    $('#active').prop('checked', true);
+                    $('#normal').prop('checked', false);
+                    $('#admin').prop('checked', true);
+                }
+            })
+        })
+
+        // 图片上传功能
+        $('#avatar').on('change', function() {
+            // 创建FormData空对象
+            var formData = new FormData();
+            // this.files[0] 保存的图片信息
+            formData.append('avatar', this.files[0]);
+            $.ajax({
+                type: 'post',
+                url: '/upload',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    // 隐藏域存储图片地址
+                    $('#img').val(res[0].avatar);
+                    // 图片路径预览
+                    $('#prev').attr('src', res[0].avatar);
+                }
+            })
+        })
     </script>
     <script>
         NProgress.done()
