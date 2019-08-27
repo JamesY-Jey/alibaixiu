@@ -82,6 +82,7 @@
                         </div>
                         <div class="form-group">
                             <button class="btn btn-primary" type="button" id="addUser">添加</button>
+                            <button class="btn btn-primary" type="button" id="editUser" style="display: none">修改</button>
                         </div>
                     </form>
                 </div>
@@ -286,7 +287,7 @@
             var role = trObj.children().eq(5).text();
             var imgSrc = trObj.children().eq(1).find('img').attr('src');
             // 填充图片
-            // 下面的判断因为在之前模板图片路径已经有默认路径 不做判断
+            // 下面的判断因为在之前模板图片路径已经有默认路径 做短路运算
             var defaultImg = '../assets/img/default.png';
             if (imgSrc && imgSrc != defaultImg) {
                 $('#prev').attr('src', imgSrc);
@@ -306,6 +307,39 @@
             } else {
                 $('#normal').prop('checked', true)
             }
+            // 修改按钮显示
+            $('#addUser').hide();
+            $('#editUser').show();
+        });
+
+        // 给修改按钮注册点击事件
+        $('#editUser').on('click', function() {
+            var formData = $('form').serialize();
+            $.ajax({
+                type: 'put',
+                url: '/users/' + id,
+                data: formData,
+                success: function(res) {
+                    // 通过res对象里面的_id属性的值去数组中 userArr这个数组将对应的元素找出来 
+                    // 如果数组里面的元素的_id的值刚好等于了res._id
+                    var index = userArr.findIndex(item => item._id == res._id);
+                    // 将res这个对象赋值给了userArr这个数组里面的指定元素
+                    userArr[index] = res;
+                    render(userArr);
+                    // 清空表单
+                    $('#addUser').show();
+                    $('#editUser').hide();
+                    $('form > h2').text('添加新用户');
+                    $('#img').val("");
+                    $('#prev').attr('src', "../assets/img/default.png");
+                    $('.form-control').val('');
+                    $('#normal').prop('checked', false);
+                    $('#admin').prop('checked', true);
+                    $('#unactive').prop('checked', false);
+                    $('#active').prop('checked', true);
+
+                }
+            })
         })
     </script>
     <script>
