@@ -390,26 +390,28 @@
 
         // 批量删除功能
         $('#allDel').on('click', function() {
-            // 找到所有被选中的复选框
-            var checkUser = $('tbody input:checked');
-            var ids = [];
-            // 遍历选中的复选框 将id添加到数组中
-            checkUser.each(function(index, item) {
-                ids.push($(item).attr('data-id'));
-            });
-            // 发送ajax
-            $.ajax({
-                type: 'delete',
-                url: '/users/' + ids.join('-'),
-                success: function(res) {
-                    // 返回的是一个对象，去userArr将对应的索引找到并渲染
-                    res.forEach(value => {
-                        var index = userArr.findIndex(item => item._id == value._id);
-                        userArr.splice(index, 1);
-                        render(userArr);
-                    })
-                }
-            })
+            if (confirm('确定要删除选中的用户吗？')) {
+                // 找到所有被选中的复选框
+                var checkUser = $('tbody input:checked');
+                var ids = [];
+                // 遍历选中的复选框 将id添加到数组中
+                checkUser.each(function(index, item) {
+                    ids.push($(item).attr('data-id'));
+                });
+                // 发送ajax
+                $.ajax({
+                    type: 'delete',
+                    url: '/users/' + ids.join('-'),
+                    success: function(res) {
+                        // 返回的是一个对象，去userArr将对应的索引找到并渲染
+                        res.forEach(value => {
+                            var index = userArr.findIndex(item => item._id == value._id);
+                            userArr.splice(index, 1);
+                            render(userArr);
+                        })
+                    }
+                })
+            }
         })
     </script>
     <script>
