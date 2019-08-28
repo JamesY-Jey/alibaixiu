@@ -38,17 +38,17 @@
                 <!-- show when multiple checked -->
                 <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
                 <form class="form-inline">
-                    <select name="" class="form-control input-sm">
-            <option value="">所有分类</option>
-          </select>
-                    <select name="" class="form-control input-sm">
-            <option value="">所有状态</option>
-            <option value="">草稿</option>
-            <option value="">已发布</option>
-          </select>
-                    <button class="btn btn-default btn-sm">筛选</button>
+                    <select name="category" class="form-control input-sm" id="category">
+                        <option value="all">所有分类</option>
+                    </select>
+                    <select name="state" class="form-control input-sm" id="state">
+                        <option value="all">所有状态</option>
+                        <option value="0">草稿</option>
+                        <option value="1">已发布</option>
+                    </select>
+                    <button class="btn btn-default btn-sm" type="button" id="btnSearch">筛选</button>
                 </form>
-                <ul class="pagination pagination-sm pull-right">
+                <ul class="pagination pagination-sm pull-right" id="page">
                     <!-- <li><a href="#">上一页</a></li>
                     <li><a href="#">1</a></li>
                     <li><a href="#">2</a></li>
@@ -69,28 +69,6 @@
                 </thead>
                 <tbody>
                     <!-- <tr>
-                        <td>随便一个名称</td>
-                        <td>小小</td>
-                        <td>潮科技</td>
-                        <td class="text-center">2016/10/07</td>
-                        <td class="text-center">已发布</td>
-                        <td class="text-center">
-                            <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
-                            <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>随便一个名称</td>
-                        <td>小小</td>
-                        <td>潮科技</td>
-                        <td class="text-center">2016/10/07</td>
-                        <td class="text-center">已发布</td>
-                        <td class="text-center">
-                            <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
-                            <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                        </td>
-                    </tr>
-                    <tr>
                         <td>随便一个名称</td>
                         <td>小小</td>
                         <td>潮科技</td>
@@ -148,6 +126,7 @@
     <script src="../assets//js/common.js"></script>
     <script src="../assets/vendors/art-template/template-web.js"></script>
 
+    <!-- 显示文章列表 -->
     <script type="text/html" id="pTpl">
         {{each records}}
         <tr>
@@ -164,24 +143,79 @@
         {{/each}}
     </script>
 
+    <!-- 显示分页列表 -->
     <script type="text/html" id="pageTpl">
-        <li><a href="#">上一页</a></li>
-        {{each display}}
-        <li class="{{$value == page?'active':''}}"><a href="#">{{$value}}</a></li>
+        {{if page>1}}
+        <li><a href="javascript:;" onclick="changePage({{page-1}})">上一页</a></li>
+        {{/if}} {{each display}}
+        <li class="{{$value == page?'active':''}}"><a href="javascript:;" onclick="changePage({{$value}})">{{$value}}</a></li>
+        {{/each}} {{if page
+        < pages}} <li><a href="javascript:;" onclick="changePage({{page-0+1}})">下一页</a></li>
+            {{/if}}
+
+    </script>
+
+    <!-- 显示分类列表 -->
+    <script type="text/html" id="cTpl">
+        {{each list}}
+        <option value="{{$value._id}}">{{$value.title}}</option>
         {{/each}}
-        <li><a href="#">下一页</a></li>
     </script>
 
     <script>
+        // 定义的函数 es6语法 如果函数不传参 默认值为等号后面的
+        function render(category = 'all', state = 'all', page = 1) {
+            $.ajax({
+                type: 'get',
+                url: '/posts',
+                data: {
+                    page: page,
+                    category: category,
+                    state: state
+                },
+                success: function(res) {
+                    // console.log(res)
+                    // 文章列表模板
+                    var str = template('pTpl', res);
+                    $('tbody').html(str);
+                    // 分页模板
+                    var pageStr = template('pageTpl', res)
+                    $('.pagination').html(pageStr);
+                }
+            });
+        };
+
+        // 载入页面显示文章列表
+        render();
+
+
+        // 点击页数调用分页函数
+        function changePage(index) {
+            // cVal和sVal定义在函数里面可以动态获取当前状态
+            var cVal = $('#category').val();
+            var sVal = $('#state').val();
+            render(cVal, sVal, index);
+        };
+
+        // 筛选
+        // 获取分类列表
         $.ajax({
             type: 'get',
-            url: '/posts',
+            url: '/categories',
             success: function(res) {
-                var str = template('pTpl', res);
-                $('tbody').html(str);
-
-                var pageStr = template('pageTpl', res)
+                console.log(res);
+                var str = template('cTpl', {
+                    list: res
+                });
+                $('#category').append(str);
             }
+        });
+
+        // 给筛选按钮注册点击事件
+        $('#btnSearch').on('click', function() {
+            var cVal = $('#category').val();
+            var sVal = $('#state').val();
+            render(cVal, sVal);
         })
     </script>
 
