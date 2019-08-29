@@ -12,4 +12,16 @@ $('#logout').on('click', function() {
             }
         })
     }
+});
+
+// 用户侧边栏头像和昵称
+$.ajax({
+    type: 'get',
+    url: '/users/' + userId,
+    success: function(res) {
+        if (res.avatar) {
+            $('.profile>img').attr('src', res.avatar);
+        }
+        $('.profile>h3').text(res.nickName);
+    }
 })
