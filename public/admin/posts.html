@@ -136,8 +136,8 @@
             <td class="text-center">{{$value.createAt && $value.createAt.substr(0,10)}}</td>
             <td class="text-center">{{$value.state == 1 ? '已发布' : '草稿'}}</td>
             <td class="text-center">
-                <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
-                <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+                <a href="post-add.html?id={{$value._id}}" class="btn btn-default btn-xs">编辑</a>
+                <a href="javascript:;" class="btn btn-danger btn-xs delete" data-id="{{$value._id}}">删除</a>
             </td>
         </tr>
         {{/each}}
@@ -174,6 +174,7 @@
                     state: state
                 },
                 success: function(res) {
+                    window.currentPage = res.page;
                     // console.log(res)
                     // 文章列表模板
                     var str = template('pTpl', res);
@@ -203,7 +204,7 @@
             type: 'get',
             url: '/categories',
             success: function(res) {
-                console.log(res);
+                // console.log(res);
                 var str = template('cTpl', {
                     list: res
                 });
@@ -211,11 +212,38 @@
             }
         });
 
+        var cVal = $('#category').val();
+        var sVal = $('#state').val();
+        // console.log(cVal, sVal)
         // 给筛选按钮注册点击事件
         $('#btnSearch').on('click', function() {
-            var cVal = $('#category').val();
-            var sVal = $('#state').val();
+            cVal = $('#category').val();
+            sVal = $('#state').val();
+            // console.log(cVal, sVal)
             render(cVal, sVal);
+        })
+
+
+        $('tbody').on('click', '.delete', function() {
+            console.log(111)
+            if (confirm('您确定要删除吗?')) {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    type: 'delete',
+                    url: '/posts/' + id,
+                    success: function(res) {
+                        if ($('tbody').children().length == 1) {
+                            if (currentPage == 1) {
+                                render(cVal, sVal, currentPage)
+                            } else {
+                                render(cVal, sVal, currentPage - 1)
+                            }
+                        } else {
+                            render(cVal, sVal, currentPage)
+                        }
+                    }
+                });
+            }
         })
     </script>
 
