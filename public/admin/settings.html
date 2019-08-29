@@ -26,7 +26,7 @@
             <button class="btn btn-default navbar-btn fa fa-bars"></button>
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="profile.html"><i class="fa fa-user"></i>个人中心</a></li>
-                <li><a href="javascript:;" id="logout"><i class="fa fa-sign-out"></i>退出</a></li>
+                <li><a href="login.html" id="logout"><i class="fa fa-sign-out"></i>退出</a></li>
             </ul>
         </nav>
         <div class="container-fluid">
@@ -41,10 +41,11 @@
                 <div class="form-group">
                     <label for="site_logo" class="col-sm-2 control-label">网站图标</label>
                     <div class="col-sm-6">
-                        <input id="site_logo" name="site_logo" type="hidden">
+                        <!-- <input id="site_logo" name="site_logo" type="hidden"> -->
                         <label class="form-image">
               <input id="logo" type="file">
-              <img src="../assets/img/logo.png">
+              <input type="hidden" id="img" name="logo">
+              <img src="../assets/img/logo.png" id="prev">
               <i class="mask fa fa-upload"></i>
             </label>
                     </div>
@@ -52,35 +53,35 @@
                 <div class="form-group">
                     <label for="site_name" class="col-sm-2 control-label">站点名称</label>
                     <div class="col-sm-6">
-                        <input id="site_name" name="site_name" class="form-control" type="type" placeholder="站点名称">
+                        <input id="site_name" name="title" class="form-control" type="type" placeholder="站点名称">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="site_description" class="col-sm-2 control-label">站点描述</label>
                     <div class="col-sm-6">
-                        <textarea id="site_description" name="site_description" class="form-control" placeholder="站点描述" cols="30" rows="6"></textarea>
+                        <textarea id="site_description" name="description" class="form-control" placeholder="站点描述" cols="30" rows="6"></textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="site_keywords" class="col-sm-2 control-label">站点关键词</label>
                     <div class="col-sm-6">
-                        <input id="site_keywords" name="site_keywords" class="form-control" type="type" placeholder="站点关键词">
+                        <input id="site_keywords" name="keywords" class="form-control" type="type" placeholder="站点关键词">
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">评论</label>
                     <div class="col-sm-6">
                         <div class="checkbox">
-                            <label><input id="comment_status" name="comment_status" type="checkbox" checked>开启评论功能</label>
+                            <label><input id="comment_status" name="comment"  value="true" type="checkbox" >开启评论功能</label>
                         </div>
                         <div class="checkbox">
-                            <label><input id="comment_reviewed" name="comment_reviewed" type="checkbox" checked>评论必须经人工批准</label>
+                            <label><input id="comment_reviewed" name="review" value="true" type="checkbox" checked>评论必须经人工批准</label>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-6">
-                        <button type="submit" class="btn btn-primary">保存设置</button>
+                        <button type="submit" class="btn btn-primary" id="save">保存设置</button>
                     </div>
                 </div>
             </form>
@@ -126,7 +127,59 @@
 
     <script src="../assets/vendors/jquery/jquery.js"></script>
     <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
-    <script src="../assets//js/common.js"></script>
+    <script src="../assets/js/common.js"></script>
+    <script>
+        //图片上传功能
+        var val = null;
+        $('#logo').on('change', function() {
+            let formData = new FormData();
+            formData.append('logo', this.files[0]);
+            $.ajax({
+                url: '/upload',
+                type: 'post',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    console.log(res)
+                    val = res[0].logo
+                    $('#prev').show().prop('src', res[0].logo);
+                    $('#img').val(res[0].logo);
+                }
+            })
+        });
+        //发送ajax修改
+        $('#save').on('click', function() {
+            if (!$('#img').val()) {
+                $('#img').val(res[0].logo)
+            }
+            let formData = $('form').serialize();
+            console.log(formData)
+            $.ajax({
+                url: '/settings',
+                type: 'post',
+                data: formData,
+                success: function(res) {
+                    console.log(res)
+                    location.reload()
+                }
+            })
+            return false
+        })
+        $.ajax({
+            url: '/settings',
+            type: 'get',
+            success: function(res) {
+                // console.log(res)
+                $('#prev').attr('src', res.logo);
+                $('#site_name').val(res.title);
+                $('#site_description').val(res.description);
+                $('#site_keywords').val(res.keywords);
+                $('#comment_status').prop('checked', res.comment);
+                $('#comment_reviewed').prop('checked', res.review);
+            }
+        })
+    </script>
     <script>
         NProgress.done()
     </script>
