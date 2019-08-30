@@ -72,6 +72,17 @@ $.ajax({
     }
 });
 
+// 点击搜索按钮注册事件
+$('.search form').on('submit', function() {
+    // 获取到搜索框里的内容
+    var keys = $(this).find('.keys').val();
+    console.log(keys);
+    // 跳转到搜索页面并传值
+    location.href = "/search.html?key=" + keys;
+    // 阻止表单默认提交行为
+    return false;
+});
+
 // 处理日期时间格式
 function formateDate(date) {
     // 将日期时间字符串转换成日期对象
