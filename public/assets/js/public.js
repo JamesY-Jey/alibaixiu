@@ -29,7 +29,7 @@ $.ajax({
     type: 'get',
     url: '/categories',
     success: function(res) {
-        console.log(res);
+        // console.log(res);
         var navTpl = `
             {{each data}}
                 <li>
@@ -49,7 +49,7 @@ $.ajax({
     type: 'get',
     url: '/comments/lasted',
     success: function(res) {
-        console.log(res);
+        // console.log(res);
         var comTpl = `
         {{each data}}
             <li>
