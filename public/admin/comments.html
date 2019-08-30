@@ -54,7 +54,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="danger">
+                    <!-- <tr class="danger">
                         <td>大大</td>
                         <td>楼主好人，顶一个</td>
                         <td>《Hello world》</td>
@@ -86,7 +86,7 @@
                             <a href="post-add.html" class="btn btn-warning btn-xs">驳回</a>
                             <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
                         </td>
-                    </tr>
+                    </tr> -->
                 </tbody>
             </table>
         </div>
@@ -131,7 +131,51 @@
 
     <script src="../assets/vendors/jquery/jquery.js"></script>
     <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
-    <script src="../assets//js/common.js"></script>
+    <script src="../assets/js/common.js"></script>
+    <script src="../assets/vendors/art-template/template-web.js"></script>
+    <script type="text/html" id="cTpl">
+        {{each records}}
+        <tr class="{{$value.state == 0 ? 'danger' : ''}}">
+            <td>{{$value.author.nickName}}</td>
+            <td>{{$value.content}}</td>
+            <td>{{$value.post.title}}</td>
+            <td>{{$value.createAt}}</td>
+            <td>{{$value.state == 0 ? '未批准' : '已批准'}}</td>
+            <td class="text-center">
+                <a href="post-add.html" class="btn {{$value.state == 0 ? 'btn-info' : 'btn-warning'}} btn-xs">{{$value.state == 0 ? '批准' : '驳回'}}</a>
+                <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+            </td>
+        </tr>
+        {{/each}}
+    </script>
+    <script>
+        // // 创建评论
+        // for (let i = 0; i < 5; i++) {
+        //     $.ajax({
+        //         type: 'post',
+        //         url: '/comments',
+        //         data: {
+        //             author: '5d648e2af7187b4678751b45',
+        //             content: '老铁一波666',
+        //             post: '5d64dae8f51da61bd0f7e571',
+        //         },
+        //         success: function(res) {
+        //             console.log(res);
+        //         }
+        //     })
+        // }
+
+        // 获取评论列表
+        $.ajax({
+            type: 'get',
+            url: '/comments',
+            success: function(res) {
+                // console.log(res);
+                var str = template('cTpl', res);
+                $('tbody').html(str);
+            }
+        })
+    </script>
     <script>
         NProgress.done()
     </script>

@@ -44,6 +44,34 @@ $.ajax({
     }
 });
 
+// 评论
+$.ajax({
+    type: 'get',
+    url: '/comments/lasted',
+    success: function(res) {
+        console.log(res);
+        var comTpl = `
+        {{each data}}
+            <li>
+                <a href="javascript:;">
+                    <div class="avatar">
+                        <img src="{{$value.author.avatar}}" alt="">
+                    </div>
+                    <div class="txt">
+                        <p>
+                            <span>{{$value.author.nickName}}</span>{{$imports.formateDate($value.createAt)}}说:
+                        </p>
+                        <p>{{$value.content}}</p>
+                    </div>
+                </a>
+            </li>
+        {{/each}}
+        `;
+        var comStr = template.render(comTpl, { data: res });
+        $('#commentBox').html(comStr);
+    }
+});
+
 // 处理日期时间格式
 function formateDate(date) {
     // 将日期时间字符串转换成日期对象
