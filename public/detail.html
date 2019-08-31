@@ -1,3 +1,21 @@
+<!-- <script>
+    function getUrlParams(name) {
+        var paramsAry = location.search.substr(1).split('&');
+        // 循环数据
+        for (var i = 0; i < paramsAry.length; i++) {
+            var tmp = paramsAry[i].split('=');
+            if (tmp[0] == name) {
+                return tmp[1];
+            }
+        }
+        return -1;
+    }
+    // 如果是从浏览器上面直接输入的是list.html页面过来的 这个cid变量的值就是-1 如果是从index.html页面跳转过来的 它的值就不是-1 
+    var id = getUrlParams('id');
+    if (id == -1) {
+        location.href = 'index.html';
+    }
+</!-->-->
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -55,22 +73,7 @@
         </div>
         <div class="content">
             <div class="article" id="article">
-                <!-- <div class="breadcrumb">
-                    <dl>
-                        <dt>当前位置：</dt>
-                        <dd><a href="javascript:;">奇趣事</a></dd>
-                        <dd>变废为宝！将手机旧电池变为充电宝的Better RE移动电源</dd>
-                    </dl>
-                </div>
-                <h2 class="title">
-                    <a href="javascript:;">又现酒窝夹笔盖新技能 城里人是不让人活了！</a>
-                </h2>
-                <div class="meta">
-                    <span>DUX主题小秘 发布于 2020-06-29</span>
-                    <span>分类: <a href="javascript:;">奇趣事</a></span>
-                    <span>阅读: (2421)</span>
-                    <span>评论: (143)</span>
-                </div> -->
+
             </div>
             <div class="panel hots">
                 <h3>热门推荐</h3>
@@ -110,6 +113,34 @@
         <br> {{content}}
     </script>
 
+    <script type="text/html" id="cTpl">
+        <style type="text/css">
+            .comment {
+                margin-bottom: 20px;
+            }
+            
+            .comment textarea {
+                box-sizing: border-box;
+                padding: 10px;
+                width: 100%;
+                height: 80px;
+                display: block;
+            }
+            
+            .comment input {
+                width: 100px;
+                height: 30px;
+                margin-top: 10px;
+            }
+        </style>
+        <div class="comment">
+            <form>
+                <textarea></textarea>
+                <input type="submit" value="提交评论">
+            </form>
+        </div>
+    </script>
+
     <script>
         // 从地址栏获取文章id
         var postId = getUrlParams('id');
@@ -136,7 +167,59 @@
                     $('#like').html(likeStr);
                 }
             });
-        })
+        });
+
+        // 判断用户是否开启了评论功能
+        $.ajax({
+            type: 'get',
+            url: '/settings',
+            success: function(res) {
+                console.log(res);
+                // 获取是否要进行人工审核的值
+                var review = res.review;
+                // var author = res._id.toString();
+                console.log(review, author)
+                    // 判断是否开启了评论状态
+                if (res.comment) {
+                    var cStr = template('cTpl');
+                    $('#article').append(cStr);
+                }
+            }
+        });
+
+        $('#article').on('submit', 'form', function() {
+            // 获取评论框的内容
+            var content = $(this).find('textarea').val();
+            // 判断用户是否开启评论审核
+            var state;
+            if (review) {
+                // 要进行人工审核
+                state = 0;
+            } else {
+                // 不用进行人工审核
+                state = 1;
+            }
+            $.ajax({
+                    type: 'post',
+                    url: '/comment',
+                    data: {
+                        content: content,
+                        post: postId,
+                        state: state,
+                        author: author
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        alert('评论成功')
+                        location.reload();
+                    },
+                    error: function() {
+                        alert('评论失败')
+                    }
+                })
+                // 阻止表单默认提交行为
+            return false;
+        });
     </script>
 </body>
 
